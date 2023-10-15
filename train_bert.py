@@ -14,7 +14,8 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import torch
 from torch import optim
-from model import HaSa,HaSa_Hard_Bias
+from model_bert import HaSa,HaSa_Hard_Bias
+#from model_robert import HaSa,HaSa_Hard_Bias
 from loss import InBatch_hard_loss,Bert_batch_bias_hard,InBatch_hard_NCEloss,Bert_batch_bias_wo_hard
 from torch.utils.data import DataLoader
 from torch.utils.data import WeightedRandomSampler
@@ -51,7 +52,7 @@ def embedding_bank(energy,entites_dataset_all,eneities_labels):
     
 
 
-def train(batch_size = 256,
+def train_bert(batch_size = 256,
           learn_rate = 2e-5,
           num_false_neg = 3,
           num_hard_neg = 3,
@@ -120,8 +121,7 @@ def train(batch_size = 256,
 
     #optim_energy = optim.AdamW(energy.parameters(),
                                      #lr=learn_rate,weight_decay=1e-4)
-    optim_energy = optim.AdamW(energy.parameters(),
-                                     lr=learn_rate)
+    optim_energy = optim.AdamW(energy.parameters(),lr=learn_rate)
     if schedule_with_warmup:
         scheduler = get_linear_schedule_with_warmup(optimizer=optim_energy,
                                                    num_warmup_steps=100,num_training_steps=epoch_step*1000)
@@ -200,14 +200,14 @@ def train(batch_size = 256,
 
             optim_energy.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(energy.parameters(), 5)
+            #torch.nn.utils.clip_grad_norm_(energy.parameters(), 5)
             optim_energy.step()
             
             if schedule_with_warmup:
                 scheduler.step()
 
 
-            if i%100 == 0:
+            if i%200 == 0:
                 energy.eval()
                 print(loss.detach().cpu().clone().numpy())
                 loss_list.append(loss.detach().cpu().clone().numpy())
@@ -409,5 +409,6 @@ def train_sample(batch_size = 256,
 
         state = {'energy': energy.state_dict(),'value': loss,'epoch': epoch,}
         torch.save(state, output_file_path+'bestmodel_1e4_'+str(epoch+1)+'.pth.tar') 
+
 
 

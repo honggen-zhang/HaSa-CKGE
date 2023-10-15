@@ -8,9 +8,9 @@ Created on Fri Jan  6 14:25:13 2023
 
 import os
 import matplotlib.pyplot as plt
-from sentence_transformers import SentenceTransformer,SentencesDataset
 import torch
 from model import HaSa,HaSa_Hard_Bias
+#from model_bert import HaSa,HaSa_Hard_Bias
 from loss import InBatch_hard_loss,Bert_batch_bias_hard,InBatch_hard_NCEloss,Bert_batch_bias_wo_hard
 from torch.utils.data import DataLoader
 from torch.utils.data import WeightedRandomSampler
@@ -124,20 +124,24 @@ def eva(batch_size = 256,
 
     device = torch.device('cuda')
 
-    #if Hasa_model == 'HaSa':
-        #print(Hasa_model)
-    energy = HaSa(pretrain_model,input_dim,em_dim).to(device)
-    loss_energy = InBatch_hard_NCEloss(batch_size = batch_size,hard_size = num_hard_neg,false_negative_size = num_false_neg)
+    if Hasa_model == 'HaSa':
+        print(Hasa_model)
+        energy = HaSa(pretrain_model,input_dim,em_dim).to(device)
+        #loss_energy = InBatch_hard_NCEloss(batch_size = batch_size,hard_size = num_hard_neg,false_negative_size = num_false_neg)
+        loss_energy = InBatch_hard_loss(batch_size = batch_size,hard_size = num_hard_neg,false_negative_size = num_false_neg)
+    
 
-    #if Hasa_model == 'HaSa_Hard_Bias':
-        #print(Hasa_model)
-        #energy = HaSa(pretrain_model,input_dim,em_dim).to(device)
-        #loss_energy = Bert_batch_bias_hard(batch_size = batch_size,false_negative_size = 4)
+    if Hasa_model == 'HaSa_Hard_Bias':
+        print(Hasa_model)
         
-    #if Hasa_model == 'HaSa_wohard_Bias':
-        #print(Hasa_model)
-        #energy =HaSa(pretrain_model,input_dim,em_dim).to(device)
-        #loss_energy = Bert_batch_bias_wo_hard(batch_size = batch_size,false_negative_size = 4)
+        energy = HaSa_Hard_Bias(pretrain_model,input_dim,em_dim).to(device)
+        loss_energy = Bert_batch_bias_hard(batch_size = batch_size,hard_size = num_hard_neg)
+        
+        
+    if Hasa_model == 'HaSa_wohard_Bias':
+        print(Hasa_model)
+        energy =HaSa_Hard_Bias(pretrain_model,input_dim,em_dim).to(device)
+        loss_energy = Bert_batch_bias_wo_hard(batch_size = batch_size,hard_size = num_hard_neg)
 
 
     triplet_reader = TripleLoader( data_file_path+data_name+'BERT_a/')

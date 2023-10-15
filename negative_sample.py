@@ -84,7 +84,7 @@ class NegativeSampleHard(object):
         true_tails = y_input['tail']
         true_head = y_input['head']
         true_r= y_input['relation']
-        
+        #sort the entities based on similarity and return some hard negatives
         dic_hard_tails, hard_tails =self.hard_tails_em(em_bank,gx_input,y_input,batch_input_true_ids)
 
         false_score_list = []
@@ -92,6 +92,7 @@ class NegativeSampleHard(object):
         entites_dataset_all_token = []
         entites_dataset_all_mask = []
         entites_dataset_all_type = []
+        #find the false negative from Neighbor 
         for i in range(len(true_tails)):
             head = true_head[i]
             relation = true_r[i]
@@ -100,7 +101,6 @@ class NegativeSampleHard(object):
             num2 = self.false_negative_size- len(false_neg_list1)
             if num2>0:
                 try:
-
                     false_neg_list2 = sample(self.graph_stru[head]['2'],num2)
                 except:
                     other_true_entity= self.dic_triplet[head+'@'+relation]*num2
@@ -121,24 +121,26 @@ class NegativeSampleHard(object):
                 entites_dataset_all_type.append(torch.LongTensor(en_example['entity_token_type_ids']).unsqueeze(0))
 
 
-
+            #the false negatives and its probabiltiy
             false_entity_tensor = torch.cat(false_entity_list, dim=0)
             false_score_i =  torch.matmul(gx_input[i],torch.transpose(false_entity_tensor, 0, 1))
             false_score_list.append(false_score_i.unsqueeze(0))
 
         
 
-
-        y_tails = y_input['tail']+y_input['head']+hard_tails+entity_input_list_lable
+        # batch data, hard data, and false data to build all tails
+        #y_tails = y_input['tail']+y_input['head']+hard_tails+entity_input_list_lable
+        y_tails = y_input['tail']+y_input['head']+hard_tails
         entity_list = [em_bank[en_name].unsqueeze(0) for en_name in y_tails]
         entity_tensor_all = torch.cat(entity_list, dim=0)
 
 
 
-
+        # return their socre and assign it as zero if we know it is false tails
         p_score =  torch.matmul(gx_input,torch.transpose(entity_tensor_all, 0, 1))
         #p_score_exp = torch.exp(p_score)#1024*1
         p_score_exp = nn.functional.normalize(p_score,dim = 1)
+        #print(p_score_exp)
         for i in range(self.batch_size):
             #k = eneities_labels.index(true_tails[i])
             p_score_exp[i][i] = -10
@@ -151,7 +153,7 @@ class NegativeSampleHard(object):
                     p_score_exp[i][k] = -10
                 except:
                     pass
-        #print(p_score_exp)
+        #false negative **data
         entites_dataset_all_token_tensor = torch.cat((entites_dataset_all_token),0)
         entites_dataset_all_mask_tensor = torch.cat((entites_dataset_all_mask),0)
         entites_dataset_all_type_tensor = torch.cat((entites_dataset_all_type),0)
@@ -160,15 +162,15 @@ class NegativeSampleHard(object):
         false_score_tensor = nn.functional.normalize(false_score_tensor,dim = 1)
 
         f_prob = nn.functional.softmax(false_score_tensor,dim = 1)
-        #print(f_prob)
+        #print('f_prob',f_prob.shape)256*3
  
         prob = nn.functional.softmax(p_score_exp,dim = 1)
-        #print(prob)
+        #print('prob',prob.shape)256*1280
         for l in range(self.batch_size):
             prob[l][l] = 1
 
 
-
+        #return prob of tails, prob of false negative tails, false ngative data, false negative label, hard negative data, hard negative label
         return prob,f_prob,{'entity_token_ids':entites_dataset_all_token_tensor,
         'entity_token_type_ids':entites_dataset_all_type_tensor,
         'entity_token_mask':entites_dataset_all_mask_tensor,},entity_input_list_lable,dic_hard_tails,hard_tails

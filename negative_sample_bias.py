@@ -27,9 +27,9 @@ class NegativeHard_Bias(object):
         for i in range(len(true_tails)):
             k = self.eneities_labels.index(true_tails[i])
             p_score_exp[i][k] = 0
+            #know some true tails
             other_true_ids= batch_input_true_ids[i]
             for j in other_true_ids:
-                #k = other_true_ids[j]
                 p_score_exp[i][j] = 0
 
 
@@ -99,6 +99,7 @@ class NegativeHard_Bias(object):
             #k = eneities_labels.index(true_tails[i])
             p_score_exp[i][i] = -10
             other_true_ids= batch_input_true_ids[i]
+            '''
             for j in other_true_ids:
                 false_tail = self.eneities_labels[j]
                 try:
@@ -107,6 +108,7 @@ class NegativeHard_Bias(object):
                     p_score_exp[i][k] = -10
                 except:
                     pass
+            '''
 
  
         prob = nn.functional.softmax(p_score_exp,dim = 1)

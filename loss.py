@@ -124,35 +124,34 @@ class InBatch_hard_loss(nn.Module):
 
         a,b = v_h.shape
         labels = torch.arange(a).to(v_h.device)
-
-        v_h_t = torch.cat((v_t, v_h,v_e_hard), 0)
+        
+        # negative include batch head,batch tail and sampled hard negatives
+        v_h_t = torch.cat((v_t,v_h,v_e_hard), 0)
+        _,num_neg = v_h_t.shape
+        # caculate the score of each negatives exp(e_hr*e_t)
         p_score =  torch.matmul(s,torch.transpose(v_h_t, 0, 1))
+        
+        # caculate the socre of each false negatives exp(e_hr*e_s)
         f_score =  torch.matmul(s.view(a,1,b),torch.transpose(v_f.view(a,self.negative_size,b), 1, 2))
         f_score = f_score.squeeze()
-            
+        
+        #assign the new score for each false negatives by the prob exp(e_hr*e_s)*exp(e_hr*e_s)/sum(exp(e_hr*e_si))
         prob = prob.to(p_score.device).detach()
-        _,num_neg = v_h_t.shape
-
         f_prob = f_prob.to(f_score.device).detach()
-        #f_score = f_score1 + f_prob
-        
         de2 = torch.exp(f_score)*f_prob
-        #de2 = torch.exp(f_score1)
         de2_sum = self.tau*de2.sum(1)
+        #assign the new score for each negatives by the prob exp(e_hr*e_t)*exp(e_hr*e_t)/sum(exp(e_hr*e_ti))
         p_score -= torch.zeros(p_score.size()).fill_diagonal_(1).to(p_score.device)
-        nu = torch.exp(p_score).diagonal(0)
         p_score_exp = torch.exp(p_score)
-        #print(p_score_exp.shape)
-        #print(p_score_exp)
-        
         de1 = p_score_exp*prob
-        #de1 = p_score_exp
+        
+        # extract the diagonal postives
+        nu = p_score_exp.diagonal(0)
+        
+        # minius the postive will only leave the negatives
         de1_sum = de1.sum(1)-nu
-        #print(de1_sum-de2_sum)
-        de = F.threshold(de1_sum-de2_sum,0,1,inplace=True)
-        #de = de1_sum
-        #print(de)
- 
+        # the negative - tua* false negative
+        de = F.threshold(de1_sum-de2_sum,0,0,inplace=True)
         loss = -1*torch.log(nu/(nu+(num_neg/(1-self.tau))*de)).mean()
     
         if self.plus:
@@ -199,22 +198,22 @@ class Bert_batch_bias_hard(nn.Module):
 
 
         labels = torch.arange(a).to(v_h.device)
-
+        
+        # all negative tails includes batch tail, head and sampled hard tails
         v_h_t = torch.cat((v_t, v_h,v_e_hard), 0)
+        # assign socre for each negative samples
         p_score =  torch.matmul(s,torch.transpose(v_h_t, 0, 1))
 
-        #print(p_score.shape)
             
         prob = prob.to(p_score.device).detach()
         _,num_neg = v_h_t.shape
-
- 
+        #postive samples minus 1 to force learn more
         p_score -= torch.zeros(p_score.size()).fill_diagonal_(1).to(p_score.device)
+        # the postive sample
         nu = torch.exp(p_score).diagonal(0)
         p_score_exp = torch.exp(p_score)
-        #print(p_score_exp.shape)
-        #print(p_score_exp)
-        
+
+        # assign score for each negative samples
         de1 = p_score_exp*prob
         #de1 = p_score_exp
         de1_sum = de1.sum(1)-nu
@@ -260,16 +259,20 @@ class InBatch_hard_NCEloss(nn.Module):
 
         a,b = v_h.shape
         labels = torch.arange(a).to(v_h.device)
-
+        # negative includes batch tails, batch head, hard negative, false negatives
         v_h_t = torch.cat((v_t, v_h,v_e_hard, v_f), 0)
-        p_score =  torch.matmul(s,torch.transpose(v_h_t, 0, 1))
-        f_score =  torch.matmul(s.view(a,1,b),torch.transpose(v_f.view(a,self.negative_size,b), 1, 2))
-        f_score = f_score.squeeze()
-            
-        prob = prob.to(p_score.device).detach()
         _,num_neg = v_h_t.shape
 
+
+        # assign score for all negatives
+        p_score =  torch.matmul(s,torch.transpose(v_h_t, 0, 1))
+        # assign score for all false negatives
+        f_score =  torch.matmul(s.view(a,1,b),torch.transpose(v_f.view(a,self.negative_size,b), 1, 2))
+        f_score = f_score.squeeze()
+        prob = prob.to(p_score.device).detach()
+        
         f_prob = f_prob.to(f_score.device).detach()
+        # make f_score from 0 to 1
         f_score_sig = torch.sigmoid(-1*f_score)
         #f_score = f_score1 + f_prob
         
@@ -330,10 +333,26 @@ class Bert_batch_bias_wo_hard(nn.Module):
         labels = torch.arange(a).to(v_h.device)
 
         v_h_t = torch.cat((v_t, v_h,v_e_hard), 0)
+        _,num_neg = v_h_t.shape
         p_score =  torch.matmul(s,torch.transpose(v_h_t, 0, 1))
- 
+        
+        #postive samples minus 1 to force learn more
         p_score -= torch.zeros(p_score.size()).fill_diagonal_(1).to(p_score.device)
-        loss = self.criterion(p_score, labels)
+        # the postive sample
+        nu = torch.exp(p_score).diagonal(0)
+        p_score_exp = torch.exp(p_score)
+
+        # assign score for each negative samples
+        de1 = p_score_exp
+        #de1 = p_score_exp
+        de1_sum = de1.sum(1)-nu
+        #print(de1_sum-de2_sum)
+        de = de1_sum
+        #print(de)
+ 
+        loss = -1*torch.log(nu/(nu+de)).mean()
+    
+        #loss = self.criterion(p_score, labels)
         if self.plus:
             labels = torch.arange(a).to(v_h.device)
             loss += self.criterion(p_score[:, :a].t(), labels)
