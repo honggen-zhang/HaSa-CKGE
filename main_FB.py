@@ -7,11 +7,10 @@ print('# gpus:',ngpus_per_node)
 
 batch_size = 256
 learn_rate = 2e-5
-#batch_size = 64
 num_false_neg = 3
 num_hard_neg = 3
 data_file_path = 'hasa/data/benchmarks/'
-output_file_path = 'dynamicgraph_lts/Honggen/HaSa/modelWWW/FB_plus/'
+output_file_path = '/models/FB/'
 Hasa_model = 'HaSa'
 #Hasa_model = 'HaSa_Hard_Bias'
 #Hasa_model = 'HaSa_wohard_Bias'
@@ -22,7 +21,7 @@ epoch_step = 5
 tau = 1e-4
 data_name = 'FB15K237_L/' 
 Resuming = False
-#loading_model = '/FB_plus/bestmodel_1e4_8.pth.tar'
+#loading_model = '/bestmodel.pth.tar'
 loading_model = None
 train(batch_size = batch_size,
            learn_rate = learn_rate,
