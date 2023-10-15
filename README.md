@@ -1,5 +1,6 @@
 # HaSa-CKGE
-This is the script of paper of Investigating the Effect of Hard Negative Sample Distribution on Contrastive Knowledge Graph Embedding. We call our algorithm Hardness and Structure-aware (HaSa) contrastive KGE.
+This is the script of the paper of HaSa: Hardness and Structure-Aware Contrastive Knowledge
+Graph Embedding \url{}. 
 
 ## Requirements
 Pytorch version 1.13 or above \
@@ -9,13 +10,13 @@ pandas version 1.5.3 pr above\
 ## Hardware
 We run experiments with 2 NV-V100-sxm2 GPUs.
 ## Training
-Traning the model to run the file\
+Training the model to run the file\
 ```
 python example/main_WN.py
 ```
 ## Link prediction
 
-For the link preduction task, we evaluate on the test data.
+For the link prediction task, we evaluate the test data.
 ```
 python example/evaluation.py
 ```
