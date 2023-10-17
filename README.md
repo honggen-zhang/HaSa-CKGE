@@ -12,13 +12,13 @@ We run experiments with 2 NV-V100-sxm2 GPUs.
 ## Training
 Training the model to run the file\
 ```
-python example/main_WN.py
+python main_WN.py
 ```
 ## Link prediction
 
 For the link prediction task, we evaluate the test data.
 ```
-python example/evaluation.py
+python evaluation.py
 ```
 
 ## Acknowledgements
