@@ -1,6 +1,6 @@
 # HaSa-CKGE
 This is the script of the paper of HaSa: Hardness and Structure-Aware Contrastive Knowledge
-Graph Embedding \url{}. 
+Graph Embedding {https://arxiv.org/pdf/2305.10563v2.pdf}. 
 
 ## Requirements
 Pytorch version 1.13 or above \
