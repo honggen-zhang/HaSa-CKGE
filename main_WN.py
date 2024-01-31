@@ -1,26 +1,32 @@
 import torch
 import torch.backends.cudnn as cudnn
-#import logging
+import logging
 from train import train
 
 ngpus_per_node = torch.cuda.device_count()
-print('# gpus:',ngpus_per_node)
+logging.info('# gpus: %s',ngpus_per_node)
+'''
+For the HaSa method, using the 'HaSa'. 
+For the Hard InfoNCE, using 'HaSa_Hard_Bias'. 
+For the simple InfoNCE, using 'HaSa_wohard_Bias'
+Using plus = True will boost HaSa as HaSa+
+'''
 
 batch_size = 256
 learn_rate = 2e-5
 num_false_neg = 3
 num_hard_neg = 3
-data_file_path = 'hasa/data/benchmarks/'
-output_file_path = '/models/WN/'
+data_file_path = 'dynamicgraph_koastore/Honggen/HaSa-CKGE-main/data/benchmarks/'
+output_file_path = 'dynamicgraph_koastore/Honggen/HaSa-CKGE-main/models/WN/'
+
 Hasa_model = 'HaSa'
 #Hasa_model = 'HaSa_Hard_Bias'
 #Hasa_model = 'HaSa_wohard_Bias'
-pretrain_model = 'sentence-transformers/all-mpnet-base-v2'#right one
+pretrain_model = 'sentence-transformers/all-mpnet-base-v2'#using the sentence-bert as backbone
 input_dim = 768
 em_dim = 500
 epoch_step = 10
 tau = 2e-5
-#tau =1e-1
 data_name = 'WN18RR/' 
 Resuming = False
 #loading_model = '/bestmodel.pth.tar'
@@ -42,5 +48,6 @@ train(batch_size = batch_size,
       loading_model=loading_model,
       schedule_with_warmup=True,
       plus = False)
+
 
 
