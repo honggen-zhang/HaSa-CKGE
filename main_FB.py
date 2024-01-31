@@ -1,9 +1,15 @@
 import torch
 import torch.backends.cudnn as cudnn
-#import logging
+import logging
 from train import train
 ngpus_per_node = torch.cuda.device_count()
-print('# gpus:',ngpus_per_node)
+logging.info('# gpus: %s',ngpus_per_node)
+'''
+For the HaSa method, using the 'HaSa'. 
+For the Hard InfoNCE, using 'HaSa_Hard_Bias'. 
+For the simple InfoNCE, using 'HaSa_wohard_Bias'
+Using plus = True will boost HaSa as HaSa+
+'''
 
 batch_size = 256
 learn_rate = 2e-5
