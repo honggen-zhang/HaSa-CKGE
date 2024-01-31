@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug 16 16:24:55 2022
-
-@author: user1
+Created on Tue Aug 16 16:24:55 2023
+@author: hz
 """
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -16,7 +15,7 @@ import torch.utils.data.dataset
 from typing import Optional, List
 from transformers import AutoTokenizer
 from tokens import get_tokenizer
-
+from tqdm import tqdm
 
 
 def _custom_tokenize(text: str,
@@ -56,23 +55,13 @@ class Token:
         
     def vectorize(self) -> dict:
 
-
-        #head_word = _parse_entity_name(self.head)
         head_word = self.head_id 
-        #head_text = _concat_name_desc(head_word, head_desc)
-        #hr_encoded_inputs = _custom_tokenize(text=head_text,text_pair=self.relation)
-
         head_encoded_inputs = _custom_tokenize(text=str(head_word))
-        #print('head_encoded_inputs',head_word)
-        #print('head_encoded_inputs',head_encoded_inputs)
 
-        #tail_word = _parse_entity_name(self.tail)
         tail_word =self.tail_id
-        #tail_encoded_inputs = _custom_tokenize(text=_concat_name_desc(tail_word, tail_desc))
         tail_encoded_inputs = _custom_tokenize(text=str(tail_word))
         
         r_encoded_inputs = _custom_tokenize(text=str(self.relation))
-        #print('r_encoded_inputs',head_encoded_inputs)
 
         return {'relation_token_ids': r_encoded_inputs['input_ids'],
                 'relation_token_type_ids': r_encoded_inputs['token_type_ids'],
@@ -88,44 +77,7 @@ class Token:
                 'head': str(head_word),
                 'obj': self}        
 
-class Token_l:
-    
-    def __init__(self, head_id, relation, tail_id):
-        self.head_id = head_id
-        self.tail_id = tail_id
-        self.relation = relation
-        
-    def vectorize(self) -> dict:
-
-
-        #head_word = _parse_entity_name(self.head)
-        head_word = self.head_id 
-        #head_text = _concat_name_desc(head_word, head_desc)
-        #hr_encoded_inputs = _custom_tokenize(text=head_text,text_pair=self.relation)
-
-        head_encoded_inputs = _custom_tokenize(text=str(head_word))
-        #print('head_encoded_inputs',head_word)
-        #print('head_encoded_inputs',head_encoded_inputs)
-
-        #tail_word = _parse_entity_name(self.tail)
-        tail_word =self.tail_id
-        #tail_encoded_inputs = _custom_tokenize(text=_concat_name_desc(tail_word, tail_desc))
-        tail_encoded_inputs = _custom_tokenize(text=str(tail_word))
-        
-        r_encoded_inputs = _custom_tokenize(text=str(self.relation))
-        #print('r_encoded_inputs',self.relation)
-
-        return {'relation_token_ids': r_encoded_inputs['input_ids'],
-                'relation_token_type_ids': r_encoded_inputs['token_type_ids'],
-                'relation_token_mask': r_encoded_inputs['attention_mask'],
-                'tail_token_ids': tail_encoded_inputs['input_ids'],
-                'tail_token_type_ids': tail_encoded_inputs['token_type_ids'],
-                'tail_token_mask': tail_encoded_inputs['attention_mask'],
-                'head_token_ids': head_encoded_inputs['input_ids'],
-                'head_token_type_ids': head_encoded_inputs['token_type_ids'],
-                'head_token_mask': head_encoded_inputs['attention_mask'],
-                'obj': self}
-        
+      
         
 class TripleLoader(object):
     
@@ -134,25 +86,15 @@ class TripleLoader(object):
     def get_examples(self,filename):
         examples = []
 
-            
         df = pd.read_csv(os.path.join(self.dataset_folder, filename), usecols=(['head','relation','tail']))
         m,n = df.shape
-        for i in range(m):
+        for i in tqdm(range(m)):
             row=df.iloc[i]
 
-            #for id, row in enumerate(data):
-            #print(row)
             s1 = row['head']
             s2 = row['relation']
             s3 = row['tail']
-            #label = row[self.s6_col_idx]
-
-            #examples.append(InputExample(texts=[s1, s2, s3,s4,s5],label = int(label)))
-            #examples.append(data_example(texts=[s1, s2, s3]))
             examples.append(Token(s1, s2, s3))
-            #s2_rverse = 'reverse of' + s2
-            #examples.append(Token(s1, s2_rverse, s3))
-
 
         return examples
     
@@ -170,10 +112,6 @@ class TripleLoader(object):
             s3 = row['name']
 
             entities.append(s3)
-            #entities.append(Token(s1,s2,s3))
-            #s2_rverse = 'reverse of' + s2
-            #examples.append(Token(s1, s2_rverse, s3))
-
 
         return entities    
     
@@ -183,7 +121,7 @@ class TripleLoader(object):
             
         df = pd.read_csv(os.path.join(self.dataset_folder, filename), usecols=(['name']))
         m,n = df.shape
-        for i in range(m):
+        for i in tqdm(range(m)):
             row=df.iloc[i]
 
             #for id, row in enumerate(data):
@@ -195,43 +133,22 @@ class TripleLoader(object):
             s3 = row['name']
 
             entities.append(Entites(s3))
-            #entities.append(Token(s1,s2,s3))
-            #s2_rverse = 'reverse of' + s2
-            #examples.append(Token(s1, s2_rverse, s3))
 
 
         return entities
     
-    def get_entities_e(self,ent):
-        entities = []
-
-
-        for i in range(len(ent)):
-
-            s3 = ent[i]
-
-            entities.append(Entites(s3))
-            #entities.append(Token(s1,s2,s3))
-            #s2_rverse = 'reverse of' + s2
-            #examples.append(Token(s1, s2_rverse, s3))
-
-
-        return entities   
 
 class Graph_KG(object):
     
-    def __init__(self, dataset_folder, has_header=False, delimiter="\t",
-                 quoting=csv.QUOTE_NONE):
+    def __init__(self, dataset_folder, has_header=False):
         self.dataset_folder = dataset_folder
         self.has_header = has_header
-        self.delimiter = delimiter
-        self.quoting = quoting
     
     def graph_generator(self, filename):
         G=nx.MultiDiGraph()
         df = pd.read_csv(os.path.join(self.dataset_folder, filename), usecols=(['head','relation','tail']))
         m,n = df.shape
-        for i in range(m):
+        for i in tqdm(range(m)):
             row=df.iloc[i]
 
             #for id, row in enumerate(data):
@@ -239,13 +156,7 @@ class Graph_KG(object):
             s1 = row['head']
             s2 = row['relation']
             s3 = row['tail']
-            #print(node)
-            #if node1+'@'+edge+'@'+node2 not in all_edges:
-                
-            #G.add_node(str(node1))
-            #G.add_node(str(node2))
             G.add_edge(str(s1), str(s3))
-            #all_edges.append(node1+'@'+edge+'@'+node2)
     
         return G 
 
