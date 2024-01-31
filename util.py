@@ -18,50 +18,8 @@ import operator
 from TripleLoader import TripleLoader,Dataset,collate,collate_en
 
 
-def ego_graph_dic_all_yg(entities, G, length = 4):
-    ego_dic = {}
-    #nodes_rank = nx.degree_centrality(G)
-    #nodes_rank_sorted = sorted(nodes_rank.items(),key = operator.itemgetter(1),reverse = True)
-    #entities = nodes_rank_sorted.keys()
-    c = 0
-    for entity in tqdm(entities):
-        nodes_ego = {}
-        for k in range(2,length):#1 2 3
-            #H = nx.ego_graph(G, n = entity, radius = 3)
-            
-            #nodes_ego[str(k)] = list(H.nodes)
-            #print(entity)
-            try:
-                edges = list(nx.bfs_edges(G, source=entity, reverse = False, depth_limit=k))
-           
-                depth_node = []
-                for s, t in edges:
-                    depth_node.append(t)
-                    if len(depth_node)>5:
-                        break
-            except:
-                edges = entity[k+c:k+c+5]
-                c = c+5
-                depth_node=edges
-            #edges = list(nx.bfs_edges(G, source=entity, reverse = True, depth_limit=k))
-            #for s, t in edges:
-                #depth_node.append(t)
-                
-            nodes_ego[str(k)] = list(set(depth_node))
-        #nodes_ego[str(length-1)] = entities
-        #nodes_ego[str(length)] = entities
-        #nodes_ego[str(4)] = entities
-        #print(len(H.nodes))
-        ego_dic[entity] = nodes_ego
-    #ego_dic_df = pd.DataFrame.from_dict(ego_dic, orient='index')
-    #ego_dic_df.to_csv('/home/user1/Desktop/NCE/KG_NCE/ini/ego_dic.csv')
-    return ego_dic
-
 def ego_graph_dic_all(entities, G, length = 4):
     ego_dic = {}
-    #nodes_rank = nx.degree_centrality(G)
-    #nodes_rank_sorted = sorted(nodes_rank.items(),key = operator.itemgetter(1),reverse = True)
-    #entities = nodes_rank_sorted.keys()
     c = 0
     for entity in tqdm(entities):
         nodes_ego = {}
@@ -82,15 +40,9 @@ def ego_graph_dic_all(entities, G, length = 4):
                 depth_node = []
                 for t in edges:
                     depth_node.append(t)
-            #edges = list(nx.bfs_edges(G, source=entity, reverse = True, depth_limit=k))
-            #for s, t in edges:
-                #depth_node.append(t)
                 
             nodes_ego[str(k)] = list(set(depth_node))
-        #nodes_ego[str(length-1)] = entities
-        #nodes_ego[str(length)] = entities
-        #nodes_ego[str(4)] = entities
-        #print(len(H.nodes))
+
         ego_dic[entity] = nodes_ego
     #ego_dic_df = pd.DataFrame.from_dict(ego_dic, orient='index')
     #ego_dic_df.to_csv('/home/user1/Desktop/NCE/KG_NCE/ini/ego_dic.csv')
@@ -117,12 +69,7 @@ def move_to_cuda(batchsample):
 
     return _move_to_cuda(batchsample)  
 
-def dic_true_triple(data_name,train_name):
-    all_triple = []
-    triplet_reader = TripleLoader( 'hasa/data/benchmarks/'+data_name+'BERT_a/')
-    examples = triplet_reader.get_examples(train_name)
-    all_triple.extend(examples)
-
+def dic_true_triple(all_triple):
     
     triple_dic = {}
     for triple in all_triple:
