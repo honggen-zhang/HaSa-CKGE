@@ -1,7 +1,8 @@
 # HaSa-CKGE
-This is the script of the The web conference (WWW) 2024 🐫 paper of HaSa: Hardness and Structure-Aware Contrastive Knowledge
+This is the script of the The web conference (WWW) 2024 🥣 paper of HaSa: Hardness and Structure-Aware Contrastive Knowledge
 Graph Embedding {https://arxiv.org/pdf/2305.10563v2.pdf}. 
 
+![alt text](Isolated.png "Title")
 ## Requirements
 Pytorch version 1.13 or above \
 transformers version 4.26.1 or above\
@@ -10,15 +11,17 @@ pandas version 1.5.3 pr above\
 ## Hardware
 We run experiments with 2 NV-V100-sxm2 GPUs.
 ## Training
-Training the model to run the file\
-```
-python main_WN.py
+Training the model to run the file
+
+```console
+honggen@hasa:~$ python main_WM_bert.py
 ```
 ## Link prediction
 
 For the link prediction task, we evaluate the test data.
-```
-python evaluation.py
+
+```console
+honggen@hasa:~$ python evaluation.py
 ```
 
 ## Acknowledgements
