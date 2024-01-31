@@ -16,8 +16,8 @@ batch_size = 256
 learn_rate = 2e-5
 num_false_neg = 3
 num_hard_neg = 3
-data_file_path = 'dynamicgraph_koastore/Honggen/HaSa-CKGE-main/data/benchmarks/'
-output_file_path = 'dynamicgraph_koastore/Honggen/HaSa-CKGE-main/models/WN/'
+data_file_path = '/data/benchmarks/'
+output_file_path = '/models/WN/'
 
 Hasa_model = 'HaSa'
 #Hasa_model = 'HaSa_Hard_Bias'
