@@ -2,7 +2,7 @@
 This is the script of the The web conference (WWW) 2024 🥣 paper of HaSa: Hardness and Structure-Aware Contrastive Knowledge
 Graph Embedding {https://arxiv.org/pdf/2305.10563v2.pdf}. 
 
-![Diagram of paper](hasa_diagram.pdf)
+![Diagram of paper](hasa_diagram.png)
 ## Requirements
 Pytorch version 1.13 or above \
 transformers version 4.26.1 or above\
