@@ -1,5 +1,5 @@
 # HaSa-CKGE
-This is the script of the paper of HaSa: Hardness and Structure-Aware Contrastive Knowledge
+This is the script of the The web conference (WWW) 2024 🐫 paper of HaSa: Hardness and Structure-Aware Contrastive Knowledge
 Graph Embedding {https://arxiv.org/pdf/2305.10563v2.pdf}. 
 
 ## Requirements
