@@ -1,6 +1,6 @@
 # HaSa-CKGE
 This is the script of the The web conference (WWW) 2024 🥣 paper of HaSa: Hardness and Structure-Aware Contrastive Knowledge
-Graph Embedding {https://arxiv.org/pdf/2305.10563v2.pdf}. 
+Graph Embedding {[https://arxiv.org/pdf/2305.10563v2.pdf](https://dl.acm.org/doi/abs/10.1145/3589334.3645564)}. 
 
 ![Diagram of paper](hasa_diag1.png)
 ![Diagram of paper](hasa_diag2.png)
